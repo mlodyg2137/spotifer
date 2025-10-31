@@ -1,0 +1,43 @@
+{
+    "items": [
+        {
+            "external_urls": {
+                "spotify": "https://open.spotify.com/artist/5puG0e0w7rzoDnPMlNhoFz"
+            },
+            "followers": {
+                "href": null,
+                "total": 10388
+            },
+            "genres": [],
+            "href": "https://api.spotify.com/v1/artists/5puG0e0w7rzoDnPMlNhoFz",
+            "id": "5puG0e0w7rzoDnPMlNhoFz",
+            "images": [
+                {
+                    "height": 640,
+                    "url": "https://i.scdn.co/image/ab67616d0000b273ef63202ae01274e181d9d02d",
+                    "width": 640
+                },
+                {
+                    "height": 300,
+                    "url": "https://i.scdn.co/image/ab67616d00001e02ef63202ae01274e181d9d02d",
+                    "width": 300
+                },
+                {
+                    "height": 64,
+                    "url": "https://i.scdn.co/image/ab67616d00004851ef63202ae01274e181d9d02d",
+                    "width": 64
+                }
+            ],
+            "name": "Tonciu",
+            "popularity": 27,
+            "type": "artist",
+            "uri": "spotify:artist:5puG0e0w7rzoDnPMlNhoFz"
+        }
+    ],
+    "total": 144,
+    "limit": 1,
+    "offset": 0,
+    "href": "https://api.spotify.com/v1/me/top/artists?limit=1&time_range=medium_term",
+    "next": "https://api.spotify.com/v1/me/top/artists?offset=1&limit=1&time_range=medium_term",
+    "previous": null
+}

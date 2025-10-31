@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: spotifer
+  security:
+    oauth2:
+      client:
+        provider:
+          spotify:
+            token-uri: https://accounts.spotify.com/api/token
+            authorization-uri: https://accounts.spotify.com/authorize
+            user-info-uri: https://api.spotify.com/v1/me
+            user-name-attribute: id
+        registration:
+          spotify-client-cred:
+            provider: spotify
+            client-id: ${SPOTIFY_CLIENT_ID}
+            client-secret: ${SPOTIFY_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope: user-read-email
+
+          spotify-auth-code:
+            provider: spotify
+            client-id: ${SPOTIFY_CLIENT_ID}
+            client-secret: ${SPOTIFY_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - user-read-email
+              - playlist-read-private
+              - user-library-read
+              - user-top-read
