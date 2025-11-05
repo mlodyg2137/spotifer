@@ -17,7 +17,6 @@ spring:
             client-secret: ${SPOTIFY_CLIENT_SECRET}
             authorization-grant-type: client_credentials
             scope: user-read-email
-
           spotify-auth-code:
             provider: spotify
             client-id: ${SPOTIFY_CLIENT_ID}
@@ -29,3 +28,9 @@ spring:
               - playlist-read-private
               - user-library-read
               - user-top-read
+              - user-read-recently-played
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pl.mlodyg.spotifer.dto.ArtistDto;
 import pl.mlodyg.spotifer.dto.TrackDto;
+import pl.mlodyg.spotifer.dto.TrackRecentlyPlayedDto;
 import pl.mlodyg.spotifer.services.SpotifyService;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public class SpotifyController {
     }
 
     @GetMapping("me/recently-played")
-    public List<TrackDto> myRecentlyPlayed(
+    public List<TrackRecentlyPlayedDto> myRecentlyPlayed(
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(required = false) String after,
             @RequestParam(required = false) String before) {

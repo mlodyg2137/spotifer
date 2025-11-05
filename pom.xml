@@ -82,6 +82,12 @@
 			<version>4.0.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.14</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -131,7 +137,7 @@
 							<targetPackage>pl.mlodyg.spotifer.externals.track</targetPackage>
 
 							<!-- katalog wyjściowy (POPRAWNA nazwa parametru) -->
-							<outputDirectory>${project.build.directory}/generated-sources/jsonschema2pojo</outputDirectory>
+							<outputDirectory>${project.build.directory}/generated-sources/jsonschema2pojo/track</outputDirectory>
 
 							<!-- adnotacje Jacksona -->
 							<annotationStyle>jackson2</annotationStyle>
@@ -158,7 +164,26 @@
 							<sourceDirectory>${project.basedir}/src/main/resources/jsonschemas/artist</sourceDirectory>
 							<sourceType>json</sourceType>
 							<targetPackage>pl.mlodyg.spotifer.externals.artist</targetPackage>
-							<outputDirectory>${project.build.directory}/generated-sources/jsonschema2pojo</outputDirectory>
+							<outputDirectory>${project.build.directory}/generated-sources/jsonschema2pojo/artist</outputDirectory>
+							<annotationStyle>jackson2</annotationStyle>
+							<generateBuilders>false</generateBuilders>
+							<includeHashcodeAndEquals>false</includeHashcodeAndEquals>
+							<includeConstructors>false</includeConstructors>
+							<includeGeneratedAnnotation>false</includeGeneratedAnnotation>
+							<addCompileSourceRoot>true</addCompileSourceRoot>
+						</configuration>
+					</execution>
+
+					<!-- TRACK RECENTLY PLAYED -->
+					<execution>
+						<id>generate-trackrecentlyplayed-models</id>
+						<phase>generate-sources</phase>
+						<goals><goal>generate</goal></goals>
+						<configuration>
+							<sourceDirectory>${project.basedir}/src/main/resources/jsonschemas/trackrecentlyplayed</sourceDirectory>
+							<sourceType>json</sourceType>
+							<targetPackage>pl.mlodyg.spotifer.externals.trackrecentlyplayed</targetPackage>
+							<outputDirectory>${project.build.directory}/generated-sources/jsonschema2pojo/trackrecentlyplayed</outputDirectory>
 							<annotationStyle>jackson2</annotationStyle>
 							<generateBuilders>false</generateBuilders>
 							<includeHashcodeAndEquals>false</includeHashcodeAndEquals>

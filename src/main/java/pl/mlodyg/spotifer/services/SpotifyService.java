@@ -9,10 +9,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import pl.mlodyg.spotifer.dto.ArtistDto;
 import pl.mlodyg.spotifer.dto.TrackDto;
+import pl.mlodyg.spotifer.dto.TrackRecentlyPlayedDto;
 import pl.mlodyg.spotifer.externals.artist.ArtistExternal;
 import pl.mlodyg.spotifer.externals.track.TrackExternal;
+import pl.mlodyg.spotifer.externals.trackrecentlyplayed.TrackRecentlyPlayedExternal;
 import pl.mlodyg.spotifer.mappers.ArtistMapper;
 import pl.mlodyg.spotifer.mappers.TrackMapper;
+import pl.mlodyg.spotifer.mappers.TrackRecentlyPlayedMapper;
 
 import java.time.Duration;
 import java.util.List;
@@ -86,7 +89,7 @@ public class SpotifyService {
         return TrackMapper.toDtos(responseJson.getItems());
     }
 
-    public List<TrackDto> myRecentlyPlayed(int limit, String after, String before) {
+    public List<TrackRecentlyPlayedDto> myRecentlyPlayed(int limit, String after, String before) {
 
         if (after != null && before != null) {
             throw new IllegalArgumentException("Cannot specify both 'after' and 'before' parameters.");
@@ -94,7 +97,7 @@ public class SpotifyService {
 
         int safeLimit = Math.max(1, Math.min(limit, 50));
 
-        TrackExternal responseJson = spotifyAuthCodeWebClient.get()
+        TrackRecentlyPlayedExternal responseJson = spotifyAuthCodeWebClient.get()
                 .uri(uri -> {
                     var b = uri.path("v1/me/player/recently-played")
                             .queryParam("limit", safeLimit);
@@ -107,10 +110,10 @@ public class SpotifyService {
                     return b.build();
                 })
                 .retrieve()
-                .bodyToMono(TrackExternal.class)
+                .bodyToMono(TrackRecentlyPlayedExternal.class)
                 .timeout(Duration.ofSeconds(10))
                 .block();
 
-        return TrackMapper.toDtos(responseJson.getItems());
+        return TrackRecentlyPlayedMapper.toDtos(responseJson.getItems());
     }
 }
