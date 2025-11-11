@@ -1,6 +1,16 @@
 spring:
   application:
     name: spotifer
+#  datasource:
+#    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:spotifer}
+#    username: ${DB_USER:postgres}
+#    password: ${DB_PASS:postgres}
+  jpa:
+    hibernate:
+#      ddl-auto: validate
+      ddl-auto: update
+    properties:
+      hibernate.jdbc.time_zone: UTC
   security:
     oauth2:
       client:
@@ -22,7 +32,9 @@ spring:
             client-id: ${SPOTIFY_CLIENT_ID}
             client-secret: ${SPOTIFY_CLIENT_SECRET}
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/spotify-auth-code"
+            client-name: Spotify (Auth Code)
             scope:
               - user-read-email
               - playlist-read-private
@@ -34,3 +46,29 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger
+
+app:
+  jwt:
+    issuer: spotifer
+    access-ttl-min: 15
+    secret: ${APP_JWT_SECRET:dev-secret-please-change}
+  auth:
+    post-login-redirect: http://127.0.0.1:5173/app
+    cookie-domain: 127.0.0.1
+
+server:
+  port: 8080
+  address: 127.0.0.1
+  # DEBUG
+  error:
+    include-message: ALWAYS
+    include-binding-errors: ALWAYS
+    include-stacktrace: ALWAYS
+
+# DEBUG
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.web: INFO
+    pl.mlodyg.spotifer: DEBUG

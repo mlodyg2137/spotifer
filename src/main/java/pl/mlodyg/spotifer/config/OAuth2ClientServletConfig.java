@@ -20,7 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.Duration;
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 public class OAuth2ClientServletConfig {
 
     @Bean
@@ -57,10 +57,10 @@ public class OAuth2ClientServletConfig {
     public WebClient spotifyClientCredWebClient(OAuth2AuthorizedClientManager manager) {
         var filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(manager);
         filter.setDefaultClientRegistrationId("spotify-client-cred");
-//        filter.setDefaultOAuth2AuthorizedClient(true);
         return baseSpotifyBuilder(filter).build();
     }
 
+    @Deprecated
     @Bean(name = "spotifyAuthCodeWebClient")
     public WebClient spotifyAuthCodeWebClient(OAuth2AuthorizedClientManager manager) {
         var filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(manager);
@@ -69,38 +69,4 @@ public class OAuth2ClientServletConfig {
         return baseSpotifyBuilder(filter).build();
     }
 
-    @Bean
-    @Order(1)
-    SecurityFilterChain api(HttpSecurity http) throws Exception {
-        http.securityMatcher("/api/**")
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/spotify/search/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-//                .oauth2Login(o -> {}) // jeśli część API ma korzystać z loginu przeglądarkowego
-//                .oauth2Login(Customizer.withDefaults())
-                .oauth2Client(Customizer.withDefaults())
-                .requestCache(rc -> rc.disable())
-                .exceptionHandling(e -> e.authenticationEntryPoint((req, res, ex) ->
-                        res.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                ));
-        return http.build();
-    }
-
-    @Bean
-    @Order(2)
-    SecurityFilterChain web(HttpSecurity http) throws Exception {
-        http.securityMatcher("/**")
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error", "/whoami",
-                                "/api/**",
-                                "/oauth2/authorization/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2Login(Customizer.withDefaults())
-                .oauth2Client(Customizer.withDefaults());
-        return http.build();
-    }
 }

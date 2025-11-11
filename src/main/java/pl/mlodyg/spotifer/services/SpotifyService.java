@@ -32,10 +32,16 @@ public class SpotifyService {
     @Qualifier("spotifyAuthCodeWebClient")
     private final WebClient spotifyAuthCodeWebClient;
 
+    @Autowired
+    @Qualifier("spotifyUserWebClient")
+    private final WebClient spotifyUserWebClient;
+
     SpotifyService(WebClient spotifyClientCredWebClient,
-                   WebClient spotifyAuthCodeWebClient) {
+                   WebClient spotifyAuthCodeWebClient,
+                   WebClient spotifyUserWebClient) {
         this.spotifyClientCredWebClient = spotifyClientCredWebClient;
         this.spotifyAuthCodeWebClient = spotifyAuthCodeWebClient;
+        this.spotifyUserWebClient = spotifyUserWebClient;
     }
 
     public Map<String, Object> searchTracks(String q, int limit) {
@@ -60,7 +66,7 @@ public class SpotifyService {
     }
 
     public List<ArtistDto> myTopArtists(int limit, String time_range, int offset) {
-        ArtistExternal responseJson = spotifyAuthCodeWebClient.get()
+        ArtistExternal responseJson = spotifyUserWebClient.get()
                 .uri(uri -> uri.path("v1/me/top/artists")
                         .queryParam("limit", limit)
                         .queryParam("time_range", time_range)
@@ -75,7 +81,7 @@ public class SpotifyService {
     }
 
     public List<TrackDto> myTopTracks(int limit, String time_range, int offset) {
-        TrackExternal responseJson = spotifyAuthCodeWebClient.get()
+        TrackExternal responseJson = spotifyUserWebClient.get()
                 .uri(uri -> uri.path("v1/me/top/tracks")
                         .queryParam("limit", limit)
                         .queryParam("time_range", time_range)
@@ -97,7 +103,7 @@ public class SpotifyService {
 
         int safeLimit = Math.max(1, Math.min(limit, 50));
 
-        TrackRecentlyPlayedExternal responseJson = spotifyAuthCodeWebClient.get()
+        TrackRecentlyPlayedExternal responseJson = spotifyUserWebClient.get()
                 .uri(uri -> {
                     var b = uri.path("v1/me/player/recently-played")
                             .queryParam("limit", safeLimit);
