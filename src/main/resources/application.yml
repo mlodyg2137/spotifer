@@ -55,6 +55,10 @@ app:
   auth:
     post-login-redirect: http://127.0.0.1:5173/app
     cookie-domain: 127.0.0.1
+  top:
+    freshness-hours: 24
+  recently-played:
+    freshness-minutes: 20
 
 server:
   port: 8080

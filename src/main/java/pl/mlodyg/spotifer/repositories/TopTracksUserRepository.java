@@ -2,11 +2,10 @@ package pl.mlodyg.spotifer.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import pl.mlodyg.spotifer.models.UserSpotifyTokens;
+import pl.mlodyg.spotifer.models.TopTracksUser;
 
 import java.util.UUID;
 
 @Repository
-public interface UserSpotifyTokensRepository extends JpaRepository<UserSpotifyTokens, UUID> {
-
+public interface TopTracksUserRepository extends JpaRepository<TopTracksUser, UUID> {
 }

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/spotify")
+@RequestMapping("/api/v1/spotify")
 public class SpotifyController {
 
     @Autowired
