@@ -3,6 +3,7 @@ package pl.mlodyg.spotifer.dto;
 import jakarta.persistence.Id;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -15,7 +16,7 @@ public class TrackRecentlyPlayedDto {
     private String albumName;
     private String albumImageUrl;
     private List<TrackRecentlyPlayedDto.Artist> artists;
-    private String playedAt;
+    private Instant playedAt;
 
     @Data
     public static class Artist {

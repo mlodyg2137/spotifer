@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pl.mlodyg.spotifer.dto.TopArtistDto;
+import pl.mlodyg.spotifer.dto.TopTrackDto;
 import pl.mlodyg.spotifer.dto.TrackDto;
 import pl.mlodyg.spotifer.services.ProfileService;
 
@@ -21,12 +23,26 @@ public class ProfileController {
     public ProfileController(ProfileService profileService) { this.profileService = profileService; }
 
     @GetMapping("/top/tracks")
-    public List<TrackDto> topTracks(
+    public List<TopTrackDto> topTracks(
             Authentication auth,
             @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "medium_term") String time_range,
+            @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "false") boolean forceRefresh
     ) {
         UUID userId = (UUID) auth.getPrincipal();
-        return profileService.getTopTracksForUser(userId, limit, forceRefresh);
+        return profileService.getTopTracksForUser(userId, limit, time_range, offset, forceRefresh);
+    }
+
+    @GetMapping("/top/artists")
+    public List<TopArtistDto> topArtists(
+            Authentication auth,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "medium_term") String time_range,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "false") boolean forceRefresh
+    ) {
+        UUID userId = (UUID) auth.getPrincipal();
+        return profileService.getTopArtistsForUser(userId, limit, time_range, offset, forceRefresh);
     }
 }

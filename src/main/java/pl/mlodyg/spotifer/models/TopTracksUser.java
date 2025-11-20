@@ -20,7 +20,7 @@ public class TopTracksUser {
     private UUID userId;
 
     @ElementCollection
-    private List<UUID> topTrackIds;
+    private List<Long> topTrackIds;
 
     private long tracksNumber;
     private Instant updatedAt;
