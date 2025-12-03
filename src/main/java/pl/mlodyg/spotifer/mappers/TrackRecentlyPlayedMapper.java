@@ -4,6 +4,7 @@ import pl.mlodyg.spotifer.dto.TrackRecentlyPlayedDto;
 import pl.mlodyg.spotifer.externals.trackrecentlyplayed.Image;
 import pl.mlodyg.spotifer.externals.trackrecentlyplayed.Item;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -20,6 +21,9 @@ public class TrackRecentlyPlayedMapper {
         dto.setSpotifyId(src.getTrack().getId());
         dto.setName(src.getTrack().getName());
         dto.setDurationMs(src.getTrack().getDurationMs());
+
+        Instant playedAt = Instant.parse(src.getPlayedAt());
+        dto.setPlayedAt(playedAt);
 
         // album
         if (src.getTrack().getAlbum() != null) {

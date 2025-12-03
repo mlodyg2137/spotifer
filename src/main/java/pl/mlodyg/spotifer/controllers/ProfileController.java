@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pl.mlodyg.spotifer.dto.PlayEventDto;
 import pl.mlodyg.spotifer.dto.TopArtistDto;
 import pl.mlodyg.spotifer.dto.TopTrackDto;
 import pl.mlodyg.spotifer.dto.TrackDto;
@@ -44,5 +45,17 @@ public class ProfileController {
     ) {
         UUID userId = (UUID) auth.getPrincipal();
         return profileService.getTopArtistsForUser(userId, limit, time_range, offset, forceRefresh);
+    }
+
+    @GetMapping("/recently-played")
+    public List<PlayEventDto> recentlyPlayed(
+            Authentication auth,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(required = false) String after,
+            @RequestParam(required = false) String before,
+            @RequestParam(defaultValue = "false") boolean forceRefresh
+    ) {
+        UUID userId = (UUID) auth.getPrincipal();
+        return profileService.getRecentlyPlayedTracksForUser(userId, limit, after, before, forceRefresh);
     }
 }

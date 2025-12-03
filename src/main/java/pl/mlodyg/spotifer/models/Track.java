@@ -1,8 +1,6 @@
 package pl.mlodyg.spotifer.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +15,8 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 public class Track {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String spotifyId;
     private String name;
@@ -26,6 +26,11 @@ public class Track {
     private Instant updatedAt;
 
     @ManyToMany
+    @JoinTable(
+            name = "track_artist",
+            joinColumns = @JoinColumn(name = "track_id"),
+            inverseJoinColumns = @JoinColumn(name = "artist_id")
+    )
     private List<Artist> artists;
 
     public Track() {

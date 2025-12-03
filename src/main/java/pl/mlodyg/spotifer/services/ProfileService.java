@@ -11,11 +11,12 @@ import pl.mlodyg.spotifer.repositories.*;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Service
 public class ProfileService {
@@ -27,6 +28,9 @@ public class ProfileService {
     private final PlayEventRepository playEventRepository;
     private final SpotifyService spotifyService;
     private final Clock clock = Clock.systemUTC();
+
+    // DEBUG LOGGING
+//    private static final Logger log = LoggerFactory.getLogger(ProfileService.class);
 
     @Value("${app.top.freshness-hours:24}") private long topFreshnessHours;
     @Value("${app.recently-played.freshness-minutes:20}") private long recentlyPlayedFreshnessMinutes;
@@ -49,6 +53,7 @@ public class ProfileService {
 
     /* ================= TOP TRACKS ================= */
 
+    @Transactional
     public List<TopTrackDto> getTopTracksForUser(UUID userId, int limit, String time_range, int offset, boolean forceRefresh) {
         var now = Instant.now(clock);
         var ttl = Duration.ofHours(topFreshnessHours);
@@ -81,7 +86,6 @@ public class ProfileService {
             topTracksUserRepository.save(top);
         }
 
-        // 4) dociągnij Track po ID w kolejności z listy
         var ids = top.getTopTrackIds();
         if (limit > 0 && limit < ids.size()) {
             ids = ids.subList(0, limit);
@@ -89,16 +93,6 @@ public class ProfileService {
 
         var tracks = trackRepository.findAllById(ids);
 
-//        var byId = tracks.stream().collect(Collectors.toMap(Track::getId, t -> t));
-//
-//        List<TopTrackDto> result = new ArrayList<>();
-//        int rank = 1;
-//        for (Long id : ids) {
-//            Track t = byId.get(id);
-//            if (t != null) {
-//                result.add(TopTrackDto.from(track = t, rank++));
-//            }
-//        }
         List<TopTrackDto> result = new ArrayList<>();
         int rank = 1;
         for (Track track : tracks) {
@@ -159,29 +153,23 @@ public class ProfileService {
 
     @Transactional
     public void syncRecentlyPlayedForUser(UUID userId, int limit, String after, String before) {
-        // 1) pobierz recently-played z Spotify
-        // 2) upsert Track / Artist
-        // 3) zapisz PlayEvent z playedAt + track
-        // 4) deduplikacja (np. po (userId, trackId, playedAt))
-
         List<TrackRecentlyPlayedDto> items = spotifyService.myRecentlyPlayed(limit, after, before);
 
         for (TrackRecentlyPlayedDto item : items) {
-            // 2) upsert Track / Artist
-            Track track = upsertTrackFromSpotify(item.getTrack());
+            Track track = upsertTrackFromSpotify(item);
             Instant playedAt = item.getPlayedAt();
 
-            // 3) deduplikacja po (userId, trackId, playedAt)
+            // deduplication
             boolean exists = playEventRepository.existsByUserIdAndTrackIdAndPlayedAt(
                     userId,
                     track.getId(),
                     playedAt
             );
+
             if (exists) {
-                continue; // ten event już mamy w bazie
+                continue;
             }
 
-            // 4) zapis PlayEvent
             PlayEvent event = new PlayEvent();
             event.setUserId(userId);
             event.setTrack(track);
@@ -192,9 +180,25 @@ public class ProfileService {
 
     }
 
-    @Transactional(readOnly = true)
-    public List<PlayEventDto> getRecentHistory(UUID userId, int limit) {
-        // np. ostatnie N PlayEvent dla usera, posortowane po playedAt DESC
+    @Transactional
+    public List<PlayEventDto> getRecentlyPlayedTracksForUser(UUID userId, int limit, String after, String before, boolean forceRefresh) {
+
+        var now = Instant.now(clock);
+        var ttl = Duration.ofMinutes(recentlyPlayedFreshnessMinutes);
+
+        var top = playEventRepository.findRecentByUserId(userId, PageRequest.of(0, limit));
+
+        // we take first item. if first item is not fresh, we update
+        PlayEvent first = top.getContent().stream().findFirst().orElse(null);
+        boolean isFresh = first != null && !forceRefresh &&
+                first.getPlayedAt() != null &&
+                first.getPlayedAt().plus(ttl).isAfter(now);
+
+
+        if (!isFresh) {
+            syncRecentlyPlayedForUser(userId, limit, after, before);
+        }
+
         return playEventRepository.findRecentByUserId(userId, PageRequest.of(0, limit))
                 .stream()
                 .map(PlayEventDto::from)
@@ -209,28 +213,49 @@ public class ProfileService {
                 .orElseGet(() -> createTrack(track));
     }
 
+    private Track upsertTrackFromSpotify(TrackRecentlyPlayedDto trackRecentlyPlayedDto) {
+        return trackRepository.findBySpotifyId(trackRecentlyPlayedDto.getSpotifyId())
+                .orElseGet(() -> createTrack(trackRecentlyPlayedDto));
+    }
+
     private Track createTrack(TrackDto trackDto) {
         Track track = new Track();
         track.setSpotifyId(trackDto.getSpotifyId());
         track.setName(trackDto.getName());
+        track.setAlbumName(trackDto.getAlbumName());
         track.setAlbumImageUrl(trackDto.getAlbumImageUrl());
         track.setDurationMs(trackDto.getDurationMs());
         track.setUpdatedAt(Instant.now(clock));
 
-        List<String> artistSpotifyIds = trackDto.getArtists().stream()
-                .map(TrackDto.Artist::getSpotifyId)
-                .toList();
-        List<Artist> artists = artistRepository.findArtistsBySpotifyIds(artistSpotifyIds);
+        // Artists
+        List<Artist> artists = new ArrayList<>();
+        for (TrackDto.Artist artistDto : trackDto.getArtists()) {
+            Artist artist = upsertArtistFromSpotify(artistDto);
+            artists.add(artist);
+        }
         track.setArtists(artists);
 
         return trackRepository.save(track);
     }
 
+    private Track createTrack(TrackRecentlyPlayedDto trackRecentlyPlayedDto) {
+        return createTrack(new TrackDto(trackRecentlyPlayedDto));
+    }
+
     private Track updateTrackIfNeeded(Track existing, TrackDto st) {
         existing.setName(st.getName());
+        existing.setAlbumName(st.getAlbumName());
         existing.setAlbumImageUrl(st.getAlbumImageUrl());
         existing.setDurationMs(st.getDurationMs());
         existing.setUpdatedAt(Instant.now(clock));
+
+        // Artists
+        List<Artist> artists = new ArrayList<>();
+        for (TrackDto.Artist artistDto : st.getArtists()) {
+            Artist artist = upsertArtistFromSpotify(artistDto);
+            artists.add(artist);
+        }
+
         return trackRepository.save(existing);
     }
 
@@ -238,6 +263,10 @@ public class ProfileService {
         return artistRepository.findBySpotifyId(artist.getSpotifyId())
                 .map(existing -> updateArtistIfNeeded(existing, artist))
                 .orElseGet(() -> createArtist(artist));
+    }
+
+    private Artist upsertArtistFromSpotify(TrackDto.Artist artist) {
+        return upsertArtistFromSpotify(new ArtistDto(artist));
     }
 
     private Artist createArtist(ArtistDto sa) {
