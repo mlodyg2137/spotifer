@@ -24,7 +24,7 @@ services:
       SPRING_DATASOURCE_USERNAME: spotifer
       SPRING_DATASOURCE_PASSWORD: spotifer
       SPRING_PROFILES_ACTIVE: docker
-      APP_AUTH_POST_LOGIN_REDIRECT: http://localhost:5173/
+      APP_AUTH_POST_LOGIN_REDIRECT: http://127.0.0.1:5173/
 
     ports:
       - "8080:8080"

@@ -56,7 +56,7 @@ app:
     access-ttl-min: 15
     secret: ${APP_JWT_SECRET:dev-secret-please-change}
   auth:
-    post-login-redirect: http://localhost:5173/
+    post-login-redirect: http://127.0.0.1:5173/
     cookie-domain: 127.0.0.1
   top:
     freshness-hours: 24
