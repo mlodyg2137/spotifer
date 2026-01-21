@@ -20,6 +20,7 @@ public final class ArtistMapper {
         dto.setSpotifyId(src.getId());
         dto.setName(src.getName());
         dto.setImageUrl(firstImageUrl(src));
+        dto.setPopularity(src.getPopularity());
 
         return dto;
     }

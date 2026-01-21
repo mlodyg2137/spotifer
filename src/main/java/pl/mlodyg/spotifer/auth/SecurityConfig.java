@@ -61,7 +61,13 @@ public class SecurityConfig {
                         .requestMatchers("/", "/assets/**", "/swagger/**", "/api-docs/**", "/login/**", "/oauth2/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(o -> o.successHandler(successHandler))
-                .logout(l -> l.logoutSuccessUrl("/"))
+                .logout(l -> l
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("http://127.0.0.1:5173/")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID", "app_access")
+                )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));
         return http.build();
     }

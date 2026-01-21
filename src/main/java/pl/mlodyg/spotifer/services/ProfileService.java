@@ -1,7 +1,9 @@
 package pl.mlodyg.spotifer.services;
 
+import com.fasterxml.jackson.databind.util.Converter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.mlodyg.spotifer.dto.*;
@@ -59,7 +61,7 @@ public class ProfileService {
         var ttl = Duration.ofHours(topFreshnessHours);
 
         // get TopTracksUser model or null (it contains userId and list of Track IDs)
-        var top = topTracksUserRepository.findByUserId(userId).orElse(null);
+        var top = topTracksUserRepository.findByUserIdAndTimeRange(userId, convert(time_range)).orElse(null);
         boolean isFresh = top != null && !forceRefresh &&
                 top.getUpdatedAt() != null &&
                 top.getUpdatedAt().plus(ttl).isAfter(now);
@@ -83,6 +85,7 @@ public class ProfileService {
             top.setTopTrackIds(trackIds);
             top.setTracksNumber(trackIds.size());
             top.setUpdatedAt(now);
+            top.setTimeRange(convert(time_range));
             topTracksUserRepository.save(top);
         }
 
@@ -110,7 +113,7 @@ public class ProfileService {
         var now = Instant.now(clock);
         var ttl = Duration.ofHours(topFreshnessHours);
 
-        var top = topArtistsUserRepository.findByUserId(userId).orElse(null);
+        var top = topArtistsUserRepository.findByUserIdAndTimeRange(userId, convert(time_range)).orElse(null);
         boolean isFresh = top != null && !forceRefresh &&
                 top.getUpdatedAt() != null &&
                 top.getUpdatedAt().plus(ttl).isAfter(now);
@@ -129,6 +132,7 @@ public class ProfileService {
             top.setArtistIds(artistIds);
             top.setArtistsNumber(artistIds.size());
             top.setUpdatedAt(now);
+            top.setTimeRange(convert(time_range));
             topArtistsUserRepository.save(top);
         }
 
@@ -142,7 +146,7 @@ public class ProfileService {
         List<TopArtistDto> result = new ArrayList<>();
         int rank = 1;
         for (Artist artist : artists) {
-            result.add(new TopArtistDto(artist.getName(), artist.getImageUrl(), rank));
+            result.add(new TopArtistDto(artist.getName(), artist.getImageUrl(), artist.getPopularity(), rank));
             rank++;
         }
 
@@ -226,6 +230,7 @@ public class ProfileService {
         track.setAlbumImageUrl(trackDto.getAlbumImageUrl());
         track.setDurationMs(trackDto.getDurationMs());
         track.setUpdatedAt(Instant.now(clock));
+        track.setPopularity(trackDto.getPopularity());
 
         // Artists
         List<Artist> artists = new ArrayList<>();
@@ -248,6 +253,7 @@ public class ProfileService {
         existing.setAlbumImageUrl(st.getAlbumImageUrl());
         existing.setDurationMs(st.getDurationMs());
         existing.setUpdatedAt(Instant.now(clock));
+        existing.setPopularity(st.getPopularity());
 
         // Artists
         List<Artist> artists = new ArrayList<>();
@@ -275,6 +281,7 @@ public class ProfileService {
         a.setName(sa.getName());
         a.setImageUrl(sa.getImageUrl());
         a.setUpdatedAt(Instant.now(clock));
+        a.setPopularity(sa.getPopularity());
         return artistRepository.save(a);
     }
 
@@ -282,6 +289,20 @@ public class ProfileService {
         existing.setName(artist.getName());
         existing.setImageUrl(artist.getImageUrl());
         existing.setUpdatedAt(Instant.now(clock));
+        existing.setPopularity(artist.getPopularity());
         return artistRepository.save(existing);
+    }
+
+    public TimeRange convert(String source) {
+        switch (source.toLowerCase()) {
+            case "short_term":
+                return TimeRange.SHORT_TERM;
+            case "medium_term":
+                return TimeRange.MEDIUM_TERM;
+            case "long_term":
+                return TimeRange.LONG_TERM;
+            default:
+                throw new IllegalArgumentException("Invalid time range: " + source);
+        }
     }
 }

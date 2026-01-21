@@ -1,6 +1,9 @@
 spring:
   application:
     name: spotifer
+  messages:
+    basename: messages
+    encoding: UTF-8
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:spotifer}
     username: ${DB_USER:postgres}
@@ -14,6 +17,9 @@ spring:
         jdbc.time_zone: UTC
     show-sql: true
     open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
   security:
     oauth2:
       client:
@@ -53,7 +59,7 @@ springdoc:
 app:
   jwt:
     issuer: spotifer
-    access-ttl-min: 15
+    access-ttl-min: 60
     secret: ${APP_JWT_SECRET:dev-secret-please-change}
   auth:
     post-login-redirect: http://127.0.0.1:5173/

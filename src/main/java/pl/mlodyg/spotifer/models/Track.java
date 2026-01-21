@@ -21,6 +21,7 @@ public class Track {
     private String spotifyId;
     private String name;
     private Integer durationMs;
+    private Integer popularity;
     private String albumName;
     private String albumImageUrl;
     private Instant updatedAt;

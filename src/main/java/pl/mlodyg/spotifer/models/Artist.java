@@ -19,6 +19,7 @@ public class Artist {
     private Long id;
     private String spotifyId;
     private String name;
+    private Integer popularity;
     private String imageUrl;
     private Instant updatedAt;
 

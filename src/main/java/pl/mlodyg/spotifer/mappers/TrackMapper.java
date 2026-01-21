@@ -19,6 +19,7 @@ public final class TrackMapper {
         dto.setSpotifyId(src.getId());
         dto.setName(src.getName());
         dto.setDurationMs(src.getDurationMs());
+        dto.setPopularity(src.getPopularity());
 
         // album
         if (src.getAlbum() != null) {
